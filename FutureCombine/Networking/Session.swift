@@ -13,21 +13,23 @@ class Session {
     static let instance  = Session()
     private init() {}
     
-    func requestCompletion<T: Codable>(to urlString: String, modelType: T.Type, complition: @escaping (Result<T, AFError>) -> Void){
+    // request Completion
+    func requestCompletion< T: Codable> (to urlString: String , modelType: T.Type, completion: @escaping (Result< T, AFError>)-> Void){
         let url = URL(string: urlString)!
-        AF.request(url).responseDecodable(of: modelType.self) { response in
+        AF.request(url).responseDecodable(of: T.self) { response in
             let result = response.result
-            complition(result)
+            completion(result)
         }
     }
-    
-    func requestPulisher<T: Codable>(to urlString: String, modelType: T.Type) -> Future< T, AFError> {
+    // request Future
+    func requestPublisher< T: Codable> (to urlString: String , modelType: T.Type) -> Future< T, AFError>{
         return Future { promise in
             let url = URL(string: urlString)!
-            AF.request(url).responseDecodable(of: modelType.self) { response in
+            AF.request(url).responseDecodable(of: T.self) { response in
                 let result = response.result
                 promise(result)
             }
         }
     }
+    
 }

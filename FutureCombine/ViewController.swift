@@ -11,48 +11,36 @@ import Alamofire
 
 class ViewController: UIViewController {
     
-    @Published var users: [User] = []
-    private var anyCancellable = Set<AnyCancellable>()
+    let url = "https://jsonplaceholder.typicode.com/users"
+    var anyCancelable = Set<AnyCancellable>()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 //        requestCompletion()
-//        requestPublisehr()
-    
-        $users.sink { users in
-            print(users)
-        }.store(in: &anyCancellable)
+//        requestPublsiher()
         
-        returnFilteredRequestAsANyPublisher(filterByName: "Ervin Howell")
+        requestPublsiher(filterByName: "Ervin Howell")
+            .sink { users in
+                print(users)
+            }.store(in: &anyCancelable)
     }
-    
     func requestCompletion(){
-        Session.instance.requestCompletion(to: "https://jsonplaceholder.typicode.com/users", modelType: [User].self) { result in
+        Session.instance.requestCompletion(to: url, modelType: [User].self) { result in
             switch result {
             case .success(let users):
                 print(users)
-                // All Process
+                
             case .failure(let failure):
                 print(failure)
             }
         }
     }
     
-    func requestPublisehr(){
-        Session.instance.requestPulisher(to: "https://jsonplaceholder.typicode.com/users", modelType: [User].self)
-            .sink { finsihed in
-                print(finsihed)
-            } receiveValue: { users in
-                print(users)
-            }.store(in: &anyCancellable)
-    }
-    
-    func returnFilteredRequestAsANyPublisher(filterByName: String) {
-        Session.instance.requestPulisher(to: "https://jsonplaceholder.typicode.com/users", modelType: [User].self)
-            .replaceError(with: [])
+    func requestPublsiher(filterByName: String) -> AnyPublisher< [User] , Never>  {
+        return Session.instance.requestPublisher(to: url, modelType: [User].self)
             .map({$0.filter({$0.name == filterByName})})
+            .replaceError(with: [])
             .eraseToAnyPublisher()
-            .assign(to: &$users)
     }
-    
 }
 
